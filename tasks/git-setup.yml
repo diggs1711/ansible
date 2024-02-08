@@ -5,6 +5,7 @@
     value: "davidhiggins1712@gmail.com"
   tags:
   - git-personal
+
 - name: Git personal setup name
   git_config:
     name: user.name
@@ -12,3 +13,45 @@
     value: "David Higgins"
   tags:
   - git-personal
+
+- git_config:
+    name: core.editor
+    scope: global
+    value: vim
+
+- git_config:
+    name: alias.st
+    scope: global
+    value: status
+
+- git_config:
+    name: alias.co
+    scope: global
+    value: checkout
+
+- name: Get latest lazygit version
+  uri:
+    url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+    return_content: yes
+  register: latest_release
+
+- name: Extract version number
+  set_fact:
+    lazygit_version: "{{ latest_release.json.tag_name | regex_replace('^v', '') }}"
+
+- name: Download lazygit tarball
+  get_url:
+    url: "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+    dest: /tmp/lazygit.tar.gz
+
+- name: Extract lazygit
+  unarchive:
+    src: /tmp/lazygit.tar.gz
+    dest: /tmp/
+    remote_src: yes
+  register: lazygit_extract
+
+- name: Install lazygit
+  become: yes
+  become_user: root
+  shell: install /tmp/lazygit /usr/local/bin/

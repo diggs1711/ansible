@@ -2,24 +2,62 @@
   apt: name=zsh
   tags: &tags_for_zsh_tasks [ 'install', 'productivity', 'dotfiles', 'zsh' ]
     
-- name: Change shell to zsh
-  shell: chsh -s $(which zsh)
-  tags: *tags_for_zsh_tasks
+# - name: Install bat 
+#   apt: name=bat
+#   become: true
+#   tags: *tags_for_zsh_tasks 
 
 - name: Check that the somefile.conf exists
   stat:
-    path: /home/theprimeagen/.oh-my-zsh
+    path: /home/diggs/.oh-my-zsh
   register: oh_my_stats
+  become: true
+  become_user: diggs
   tags: *tags_for_zsh_tasks
 
 - name: Oh-My-Zsh
-  shell: curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh > ~/.oh-my-installer && chmod +x ~/.oh-my-installer && ~/.oh-my-installer
+  shell: curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh > /home/diggs/.oh-my-installer && chmod +x /home/diggs/.oh-my-installer && /home/diggs/.oh-my-installer
   tags: *tags_for_zsh_tasks
   when: oh_my_stats.stat.exists == False
-  become_user: theprimeagen
+  become: true
+  become_user: diggs
 
 - name: Install zsh-autosuggestions
+  become: true
+  become_user: diggs
   ansible.builtin.git:
     repo: 'https://github.com/zsh-users/zsh-autosuggestions.git'
-    dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
+    dest: "/home/diggs/.oh-my-zsh/plugins/zsh-autosuggestions"
+  tags: *tags_for_zsh_tasks
+
+- name: Install zsh-syntax-highlighting
+  become: true
+  become_user: diggs
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
+    dest: "/home/diggs/.oh-my-zsh/plugins/zsh-syntax-highlighting"
+  tags: *tags_for_zsh_tasks
+
+- name: Install you-should-use
+  become: true
+  become_user: diggs
+  ansible.builtin.git:
+    repo: 'https://github.com/MichaelAquilina/zsh-you-should-use.git'
+    dest: "/home/diggs/.oh-my-zsh/plugins/you-should-use"
+  tags: *tags_for_zsh_tasks
+
+- name: Install zsh-bat
+  become: true
+  become_user: diggs
+  ansible.builtin.git:
+    repo: 'https://github.com/fdellwing/zsh-bat.git'
+    dest: "/home/diggs/.oh-my-zsh/plugins/zsh-bat"
+  tags: *tags_for_zsh_tasks
+
+
+
+- name: Delete .zshrc
+  file:
+    path: /home/diggs/.zshrc
+    state: absent
   tags: *tags_for_zsh_tasks
